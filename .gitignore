@@ -1,0 +1,13 @@
+# any datev Links
+*.[Dd][Ll][Kk]
+
+# excel files
+*.[Xx][Ll][Ss]*
+# word files
+*.[Dd][Oo][Cc]*
+# PDF 
+*.[Pp][Dd][Ff]*
+# tif
+*.[Tt][Ii][Ff]*
+*__pycache__*
+*.[Dd][Bb]*
