@@ -195,8 +195,12 @@ class SelectionPage(tk.Frame):
         return re.match('^[0-9]*$', newval) is not None and len(newval) <= 2
         
     def delete(self):
-        file = self.tree.
-        pass
+        file = self.tree.focus()
+        if file == "":
+            return
+        del self.pathAndFile[file]
+        self.showTree(self.pathAndFile)
+
     
     def addPdf(self,data):
         """Triggers on Drop.
