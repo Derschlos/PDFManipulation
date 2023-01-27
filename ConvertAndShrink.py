@@ -12,6 +12,7 @@ from PIL import Image, ImageEnhance
 from tkinter.messagebox import showwarning
 import fitz
 import time
+from multiprocessing import Pool, freeze_support
 from PyInstaller.utils.hooks import collect_data_files, eval_statement
 datas = collect_data_files('tkinterdnd2')
 
@@ -255,12 +256,14 @@ class SelectionPage(tk.Frame):
             self.updateProgress('Fehlender Wert', 0)
             return
         for file in self.pathAndFile:
-            self.updateProgress(f'Separiert {file}', 2)
+            self.updateProgress(f'Separiert {file}',3)
             frames = self.splitPdf(file, choosenValues)
-            self.updateProgress(f'{len(frames)} Seiten werden reduziert', 3)
+            self.updateProgress(f'{len(frames)} Seiten werden reduziert', 7)
             self.reducePictures(frames, choosenValues)
-            self.updateProgress(f'{len(frames)} Seiten reduziert', 6)
+            self.updateProgress(f'{len(frames)} Seiten reduziert', 10)
             self.createNewPdf(frames, file)
+        for directory in self.garbageDirs:
+            os.rmdir(directory)
 
     def updateProgress(self, labelString:str , progress:int):
         self.progressbar["value"] = progress
@@ -278,6 +281,7 @@ class SelectionPage(tk.Frame):
         i = 1
         for frame in pdf.pages():
             pix = frame.get_pixmap(dpi = qualityDict['dpi'])
+##            self.updateProgress(f'Seite {i} gefunden',5)
             frameName = f'{tempStorage}//{file}_page_{i}.jpg'
             pix.save(frameName)
             frames.append(frameName)
@@ -285,7 +289,9 @@ class SelectionPage(tk.Frame):
         return frames
 
     def reducePictures(self, frames:list, qualityDict:dict):
+        i = 1
         for frame in frames:
+            self.updateProgress(f'Seite {i} reduziert',5)
             img = Image.open(frame)
             width,height = img.size
             ratio = width/qualityDict['size']
@@ -294,6 +300,7 @@ class SelectionPage(tk.Frame):
             img = img.convert(qualityDict['mode'])
             img.save(frame, dpi = (qualityDict['dpi'],qualityDict['dpi']),
                      optimize=True, quality=qualityDict['quality'])
+            i+=1
         return
 
     def createNewPdf(self, frames:list, file:str):
