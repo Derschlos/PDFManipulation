@@ -11,16 +11,16 @@ def convert(file, savePath,name):
 ##    matrix = fitz.Matrix(300 / 72, 300 / 72)
     for frame in pdf.pages():
         pix = frame.get_pixmap(dpi = 300)
-        pix.save(f'Page_{i}.jpg')
-        unopend.append(f'Page_{i}.jpg')
+        pix.save(f'Page_{i}.png')
+        unopend.append(f'Page_{i}.png')
         i+=1
     for uno in unopend:
         img= Image.open(uno)
         width,height = img.size
         ratio =width/700.0
         img = img.resize((int(width/ratio),int(height/ratio)),Image.ANTIALIAS)
-        #img = img.convert('1')
-        img = img.convert('L')
+        img = img.convert('1')
+        #img = img.convert('L')
         img.save(uno, dpi = (300,300),  optimize=True, quality=50)
     for uno in unopend:
         img = fitz.open(uno)
@@ -37,8 +37,8 @@ def convert(file, savePath,name):
     
 
 if __name__ == '__main__':
-    path = r'S:\scanns'
-    file = "Besondere_Anlagebedingungen.pdf"
+    path = r'C:\Users\davidleonschmidt\Desktop\Progs\pdfManipulation\PDFManipulation'
+    file = "GS.pdf"
     convert(path + '\\' + file, path,file + 'Convert' )
 ##    orgPath = r'M:\Mandanten\SkyOne Property SCS\Unterlagen USt Lux 2021\Rechnungen Vorsteuer Vergütungsverfahren\Unterlagen für StB AVEGA'
 ##    saveOrd= r'C:\Users\davidleonschmidt\Desktop\Progs\pdf\Unterlagen für StB AVEGA'
