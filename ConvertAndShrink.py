@@ -5,13 +5,13 @@
 import tkinter as tk
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from tkinter import ttk
-import re
+##import re
 ##import os
 ##import math
 ##from PIL import Image, ImageEnhance
 from tkinter.messagebox import showwarning
-import fitz
-import time
+##import fitz
+##import time
 from multiprocessing import Pool, freeze_support
 from SelectionPage import SelectionPage
 from WorkPage import WorkPage
@@ -37,6 +37,8 @@ class basedesk:
         self.baseContainer.pack(side = "top", fill = "both", expand = True)
         self.baseContainer.grid_rowconfigure(0, weight = 1)
         self.baseContainer.grid_columnconfigure(0, weight = 1)
+        self.qualityValues = {}
+        self.pathAndFile = {}
 
         self.frames = {}
 
@@ -51,7 +53,21 @@ class basedesk:
         frame.tkraise()
         frame.onRaise()
 
-        
+    def updateWorkPage(self, files: dict):
+        try:
+            self.frames['WorkPage'].pathAndFile = files
+        except Exception as e:
+            print(e)
+            showwarning(title='Error',
+            message=('could not find ',e))
+            
+    def updateSelectionPage(self,):
+        try:
+            self.frames['SelectionPage'].showTree(self.pathAndFile)
+        except Exception as e:
+            print(e)
+            showwarning(title='Error',
+            message=('could not find ',e))      
 
 
 

@@ -7,6 +7,8 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 from tkinter import ttk
 from tkinter.messagebox import showwarning
 import re
+import os
+import math
 
 class SelectionPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -17,8 +19,7 @@ class SelectionPage(tk.Frame):
         self.bg = 'lightsalmon'
         self.config(bg = self.bg,)
         self.controller = controller
-        self.pathAndFile = {}
-        self.garbageDirs = []
+        self.controller.pathAndFile = {}
 
         
         self.modeVar = tk.StringVar()
@@ -144,8 +145,8 @@ class SelectionPage(tk.Frame):
         file = self.tree.focus()
         if file == "":
             return
-        del self.pathAndFile[file]
-        self.showTree(self.pathAndFile)
+        del self.controller.pathAndFile[file]
+        self.showTree(self.controller.pathAndFile)
 
     
     def addPdf(self,data):
@@ -172,11 +173,11 @@ class SelectionPage(tk.Frame):
             folder,file = os.path.split(dat)
             sizeInKB = math.ceil(os.stat(dat).st_size/1024)
             if ".pdf" in file[-4:len(file)].lower():
-                self.pathAndFile[file] ={
+                self.controller.pathAndFile[file] ={
                     'path':folder,
                     "progPath":dat,
                     "size":sizeInKB}
-            self.showTree(self.pathAndFile)
+            self.showTree(self.controller.pathAndFile)
 
     def showTree(self, dataDict):
         for child in self.tree.get_children(''):
@@ -186,7 +187,6 @@ class SelectionPage(tk.Frame):
                              'end',
                              data,
                              values = [data, dataDict[data]['size']])
-            self.progressLab['text'] = 'Datei eingefügt'
 
     # Main creation Logic
     def minify(self):
@@ -197,7 +197,7 @@ class SelectionPage(tk.Frame):
         if '' in choosenValues.values():
             showwarning(title = 'Fehlender Wert',
                         message = f'Es fehlen Werte: {[keyName for keyName,value in choosenValues.items() if value == ""]}')
-            self.updateProgress('Fehlender Wert', 0)
             return
         else:
+            self.controller.qualityValues = choosenValues
             self.controller.showFrame('WorkPage')
