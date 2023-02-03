@@ -18,7 +18,7 @@ class WorkPage(tk.Frame):
         super().__init__(parent)
         self.pageName = 'WorkPage'
         self.bg = 'lightsalmon'
-        self.dimensions = '700x450'
+        self.dimensions = '672x455'
         self.config(bg = self.bg,)
         self.controller = controller
         self.controller.pathAndFile = {}
@@ -27,70 +27,81 @@ class WorkPage(tk.Frame):
 
 
     
-    # Grid
-      # Status Frame
-##        self.statusFrame = tk.Frame(self,bg = self.bg)
+    
+    # Widgets
         self.progressbar = ttk.Progressbar(self,
                                  orient='horizontal',
                                  mode='determinate',
                                  maximum = 10)
-        self.statusText = tk.Text(self,state='disabled', )
+        self.textFrame = tk.Frame(self, bg=self.bg)
+        self.statusText = tk.Text(self.textFrame,state='disabled', )
+        self.statusTextYScroll = tk.ttk.Scrollbar(self.textFrame, orient = 'vertical', command = self.statusText.yview)
+        self.statusText['yscrollcommand'] = self.statusTextYScroll.set
+        self.returnBut = tk.Button(self, text = 'Zurück zur Auswahl', 
+                                   command= self.returnToSelection, 
+                                   state= 'disabled')
 
-##        self.progressLab = tk.Label(self.statusFrame,
-##                                    text = "",
-##                                    width = 20,
-##                                    anchor = 'w',
-##                                    bg = self.bg)
-##
-     # Status grid
-##        self.statusFrame.grid_columnconfigure(1, weight = 3)
-##        self.statusFrame.grid(column  = 1, row = 3,
-##                              padx = 5, pady = 10,
-##                              columnspan = 2, 
-##                              sticky = ('e','n','w'))
+
+    # Grid
+        self.textFrame.grid(column  = 1, row = 1, padx=5, pady=5)
+        self.statusText.grid(column  = 1, row = 1)
+        self.statusTextYScroll.grid(column  = 2, row = 1,
+                                    sticky = ('n','s','w'))
         self.progressbar.grid(column  = 1, row = 2,
-                           sticky= ('e','w'),
+                           sticky= ('e','w'), columnspan=2,
                            padx = 3)
-##        self.progressLab.grid(column  = 2, row = 1)
-        self.statusText.grid(column  = 1, row = 1, padx=5)
+        self.returnBut.grid(column  = 1, row = 3,
+                           sticky= ('e','w'), columnspan = 2,
+                           padx = 3, pady = 5)
 
 
     def onRaise(self):
         self.controller.root.title('Work Page')
         self.controller.root.geometry(self.dimensions)
-        self.controller.root.after_idle(self.minify())
+        self.controller.root.update_idletasks()
+        self.controller.root.after_idle(self.minify)
 
     def insertText(self,text:str):
         self.statusText['state'] = 'normal'
         self.statusText.insert('end', text)
         self.statusText.insert('end', '\n')
+        self.statusText.see('end')
         self.statusText['state'] = 'disabled'
-
+        
+    def returnToSelection(self):
+        self.statusText['state'] = 'normal'
+        self.statusText.delete('1.0', 'end')
+        self.statusText['state'] = 'disabled'
+        self.controller.showSelectionFrame()
+        self.returnBut['state'] = 'disabled'
 
     # Main creation Logic
-    def minify(self):
-        self.updateProgress('Neue Datei', 0)       
+    def minify(self):       
         for file in self.controller.pathAndFile:
-            self.updateProgress(f'Trennt {file} in einzelnde Seiten',3)
+            self.updateProgress(f'Neue Datei {file}', 0)
+            self.updateProgress(f'Trennt "{file}" in einzelnde Seiten',3)
             frames = self.splitPdf(file, self.controller.qualityValues)
             self.updateProgress(f'{len(frames)} Seiten werden reduziert', 7)
             self.reducePictures(frames, self.controller.qualityValues)
-            self.updateProgress(f'{len(frames)} Seiten reduziert', 10)
+            self.updateProgress(f'{len(frames)} Seiten von {file} reduziert', 10)
             self.createNewPdf(frames, file)
         for directory in self.garbageDirs:
+            self.updateProgress(f'Löscht folgende Temp Ordner: {self.garbageDirs}', 10)
             os.rmdir(directory)
         self.controller.pathAndFile = {}
         self.garbageDirs = []
         self.controller.updateSelectionPage()
+        self.returnBut['state'] = 'normal'
+        
     
     def updateProgress(self, text:str , progress:int):
         self.progressbar["value"] = progress
         self.insertText(text)
-        self.controller.root.update_idletasks()
+        self.controller.root.update()
 
     def splitPdf(self, file:str, qualityDict:dict):
         fileData = self.controller.pathAndFile[file]
-        tempStorage = fileData['path']+r'\temp'
+        tempStorage = fileData['path']+r'/temp'
         if not os.path.isdir(tempStorage):
             os.mkdir(tempStorage)
         self.garbageDirs.append(tempStorage)

@@ -46,12 +46,18 @@ class basedesk:
             frame = f(self.baseContainer, self)
             self.frames[frame.pageName] = frame
             frame.grid(row = 0, column = 0, sticky ="nsew")
-        self.showFrame('SelectionPage')
-        
+        self.showSelectionFrame()
+        #self.showWorkFrame()
+
     def showFrame(self,frameName):
         frame= self.frames[frameName]
         frame.tkraise()
         frame.onRaise()
+    
+    def showWorkFrame(self):
+        self.showFrame('WorkPage')
+    def showSelectionFrame(self):
+        self.showFrame('SelectionPage')
 
     def updateWorkPage(self, files: dict):
         try:

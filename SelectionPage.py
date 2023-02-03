@@ -17,6 +17,7 @@ class SelectionPage(tk.Frame):
         self.pageName = 'SelectionPage'
         self.style = ttk.Style()
         self.bg = 'lightsalmon'
+        self.dimensions = '530x175'
         self.config(bg = self.bg,)
         self.controller = controller
         self.controller.pathAndFile = {}
@@ -28,14 +29,20 @@ class SelectionPage(tk.Frame):
         self.sizeVar = tk.StringVar(value = 800)
 
     #widgets
-        self.tree = ttk.Treeview(self,
+        self.treeFrame= tk.Frame(self, bg = self.bg)
+        self.tree = ttk.Treeview(self.treeFrame,
                                  show='headings',
                                  columns = ('name','size'),
-                                 height = 7,)
+                                 height = 6,)
         self.tree.heading('name', text = "Name",)
         self.tree.heading('size', text = "Größe in KB")
         self.tree.column('#2', width = 80, anchor = 'center')
-        self.tree.column('#1', stretch = True)
+        self.tree.column('#1', stretch = False)
+        self.treeYScroll = tk.ttk.Scrollbar(self.treeFrame, orient = 'vertical', command = self.tree.yview)
+        self.tree['yscrollcommand'] = self.treeYScroll.set
+        self.treeXScroll = tk.ttk.Scrollbar(self.treeFrame, orient = 'horizontal', command = self.tree.xview)
+        self.tree['xscrollcommand'] = self.treeXScroll.set
+        self.tree.column('#1', )
 
         # Mode Radiobuttons
         self.radioFrame = tk.Frame(self, bg = self.bg)
@@ -81,7 +88,7 @@ class SelectionPage(tk.Frame):
                                   text = "Dokumente reduzieren",
                                   command = self.minify)
         self.deletePDF = tk.Button(self.buttonFrame,
-                                  text = "Dokument löschen",
+                                  text = "Dokument entfernen",
                                   command = self.delete)
         
         
@@ -91,29 +98,35 @@ class SelectionPage(tk.Frame):
 
 
     #postition
-        self.tree.grid(column  = 3, row = 1,
+        self.treeFrame.grid(column  = 2, row = 1,
                        rowspan = 3,
                        pady = 5, padx = 5,)
-        self.radioFrame.grid(column  = 1, row = 0,
-                             rowspan = 2,
+        self.tree.grid(column  = 1, row = 1,)
+        self.treeYScroll.grid(column  = 2, row = 1,
+                              rowspan = 2,
+                              sticky = ('n','s'))
+        self.treeXScroll.grid(column  = 1, row = 2,
+                              sticky = ('e','w'))
+
+        self.radioFrame.grid(column  = 1, row = 1,
+                             rowspan = 1,
                              padx = 5,
-                             sticky = 'w')
+                             sticky = 'we')
         self.blackWhite.grid(column  = 1, row = 1,
                              padx = 5,
                              sticky = 'w')
-        self.greyScale.grid(column  = 1, row = 2,
+        self.greyScale.grid(column  = 2, row = 1,
                             padx = 5,
                             sticky = 'w')
         # Button grid
-        self.buttonFrame.grid(column  = 1, row = 2,
-                              columnspan = 2,
-                              padx = 5, sticky = 'w')
-        self.startBut.grid(column  = 1, row = 1,)
-        self.deletePDF.grid(column  = 2, row = 1, padx = 15)
+        self.buttonFrame.grid(column  = 1, row = 3,
+                              padx = 5, sticky = ('w','e'))
+        self.startBut.pack(fill='both')
+        self.deletePDF.pack(fill='both')
+
         # Quali grid
-        self.qualiFrame.grid(column  = 2, row = 1,
-                             padx = 5, pady = 10,
-                             sticky = 'n')
+        self.qualiFrame.grid(column  = 1, row = 2,
+                             sticky = 'we')
         self.dpiLabel.grid(column  = 1, row = 1,
                            padx = 5,
                            sticky = 'w')
@@ -136,6 +149,8 @@ class SelectionPage(tk.Frame):
         
     def onRaise(self):
         self.controller.root.title('Selection Page')
+        self.controller.root.geometry(self.dimensions)
+
     def checkDpiSizeNum(self, newval):
         return re.match('^[0-9]*$', newval) is not None and len(newval) <= 3
     def checkQualiNum(self,newval):
@@ -190,6 +205,7 @@ class SelectionPage(tk.Frame):
 
     # Main creation Logic
     def minify(self):
+        print(len(self.controller.pathAndFile))
         choosenValues = {'mode':self.modeVar.get(),
                          'dpi':int(self.dpiEntry.get()),
                          'size': int(self.sizeEntry.get()),
@@ -198,6 +214,10 @@ class SelectionPage(tk.Frame):
             showwarning(title = 'Fehlender Wert',
                         message = f'Es fehlen Werte: {[keyName for keyName,value in choosenValues.items() if value == ""]}')
             return
+        elif len(self.controller.pathAndFile) <1 :
+            showwarning(title = 'Keine Dateien',
+                        message = f'Bitte fügen Sie Datein hinzu')
+            return
         else:
             self.controller.qualityValues = choosenValues
-            self.controller.showFrame('WorkPage')
+            self.controller.showWorkFrame()
